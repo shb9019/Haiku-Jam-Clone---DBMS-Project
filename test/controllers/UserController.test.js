@@ -1,4 +1,3 @@
-const test = require('ava');
 const request = require('supertest');
 const {
   beforeAction,
@@ -8,99 +7,83 @@ const User = require('../../api/models/User');
 
 let api;
 
-test.before(async () => {
+beforeAll(async () => {
   api = await beforeAction();
 });
 
-test.after(() => {
+afterAll(() => {
   afterAction();
 });
 
-test.serial('User | create', async (t) => {
-  let id;
-
-  await request(api)
+test('User | create', async () => {
+  const res = await request(api)
     .post('/public/user')
     .set('Accept', /json/)
     .send({
-      username: 'martin',
+      email: 'martin@mail.com',
       password: 'securepassword',
+      password2: 'securepassword',
     })
-    .expect(200)
-    .then((res) => {
-      t.truthy(res.body.user);
-      id = res.body.user.id;
-      return id;
-    });
+    .expect(200);
 
-  await User.findById(id).then((user) => {
-    t.is(user.id, id);
-    t.is(user.username, 'martin');
-    return user.destroy();
-  });
+  expect(res.body.user).toBeTruthy();
+
+  const user = await User.findById(res.body.user.id);
+
+  expect(user.id).toBe(res.body.user.id);
+  expect(user.email).toBe(res.body.user.email);
+
+  await user.destroy();
 });
 
-test.serial('User | login', async (t) => {
-  let testUser;
-  await User.create({
-    username: 'martin',
+test('User | login', async () => {
+  const user = await User.create({
+    email: 'martin@mail.com',
     password: 'securepassword',
-  }).then((user) => {
-    testUser = user;
-    return testUser;
   });
 
-  await request(api)
+  const res = await request(api)
     .post('/public/login')
     .set('Accept', /json/)
     .send({
-      username: 'martin',
+      email: 'martin@mail.com',
       password: 'securepassword',
     })
-    .expect(200)
-    .then((res) => t.truthy(res.body.token));
+    .expect(200);
 
-  t.truthy(testUser);
+  expect(res.body.token).toBeTruthy();
 
-  await testUser.destroy();
+  expect(user).toBeTruthy();
+
+  await user.destroy();
 });
 
-test.serial('User | get all (auth)', async (t) => {
-  let token;
-  let testUser;
-  await User.create({
-    username: 'martin',
+test('User | get all (auth)', async () => {
+  const user = await User.build({
+    email: 'martin@mail.com',
     password: 'securepassword',
-  }).then((user) => {
-    testUser = user;
-    return testUser;
-  });
+  }).save();
 
-  await request(api)
+  const res = await request(api)
     .post('/public/login')
     .set('Accept', /json/)
     .send({
-      username: 'martin',
+      email: 'martin@mail.com',
       password: 'securepassword',
     })
-    .expect(200)
-    .then((res) => {
-      t.truthy(res.body.token);
-      token = res.body.token;
-      return token;
-    });
+    .expect(200);
 
-  await request(api)
+  expect(res.body.token).toBeTruthy();
+
+  const res2 = await request(api)
     .get('/private/users')
     .set('Accept', /json/)
-    .set('Authorization', `Bearer ${token}`)
+    .set('Authorization', `Bearer ${res.body.token}`)
     .set('Content-Type', 'application/json')
-    .expect(200)
-    .then((res) => {
-      t.truthy(res.body.users);
-      t.is(res.body.users.length, 1);
-      return null;
-    });
+    .expect(200);
 
-  await testUser.destroy();
+  expect(res2.body.users).toBeTruthy();
+  expect(res2.body.users.length).toBe(1);
+
+  await user.destroy();
 });

@@ -7,7 +7,7 @@
 - support for [sqlite](https://www.sqlite.org/), [mysql](https://www.mysql.com/), and [postgresql](https://www.postgresql.org/)
 - environments for `development`, `testing`, and `production`
 - linting via [eslint](https://github.com/eslint/eslint)
-- integration tests running with [AVA](https://github.com/avajs/ava)
+- integration tests running with [Jest](https://github.com/facebook/jest)
 - built with [npm sripts](#npm-scripts)
 - example for User model and User controller, with jwt authentication, simply type `npm i` and `npm start`
 
@@ -36,7 +36,7 @@ Start by cloning this repository
 
 ```sh
 # HTTPS
-$ git clone https://github.com/aichbauer/express-resr-api-boilerplate.git
+$ git clone https://github.com/aichbauer/express-rest-api-boilerplate.git
 ```
 
 then
@@ -48,6 +48,8 @@ $ yarn
 $ yarn add mysql2
 # to use postgresql
 $ yarn add pg pg-hstore
+# start the api
+$ yarn start
 ```
 
 or
@@ -58,7 +60,9 @@ $ npm i
 # to use mysql
 $ npm i mysql2 -S
 # to use postgresql
-$ yarn i -S pg pg-hstore
+$ npm i -S pg pg-hstore
+# start the api
+$ npm start
 ```
 
 sqlite is supported out of the box as it is the default.
@@ -70,38 +74,7 @@ This boilerplate has 4 main directories:
 - api - for controllers, models, services, etc.
 - config - for routes, database, etc.
 - db - this is only a dir for the sqlite db, the default for NODE_ENV development
-- test - using [AVA](https://github.com/avajs/ava)
-
-```sh
-src
-├── api
-│   ├── controllers
-│   │   └── UserController.js
-│   ├── models
-│   │   └── User.js
-│   ├── policies
-│   │   └── auth.policy.js
-│   ├── services
-│   │   ├── auth.service.js
-│   │   └── bcrypt.service.js
-│   └── api.js
-├── config
-│   ├── connection.js
-│   ├── database.js
-│   ├── index.js
-│   └── routes
-│        ├── privateRoutes.js
-│        └── publicRoutes.js
-├── db
-│   └── database.sqlite
-└── test
-    ├── controllers
-    │   └── UserController.test.js
-    ├── models
-    │   └── User.test.js
-    └── setup
-         └── _setup.js
-```
+- test - using [Jest](https://github.com/facebook/jest)
 
 ## Controllers
 
@@ -117,112 +90,116 @@ Example Controller for all **CRUD** oparations:
 const Model = require('../models/Model');
 
 const ModelController = () => {
-  const create = (req, res) => {
+  const create = async (req, res) => {
     // body is part of a form-data
-    const value = req.body.value;
+    const { value } = req.body;
 
-    Model.create({
-      key: value
-    }).then((model) => {
+    try {
+      const model = await Model.create({
+        key: value
+      });
+
       if(!model) {
         return res.status(400).json({ msg: 'Bad Request: Model not found' });
       }
 
       return res.status(200).json({ model });
-    }).catch((err) => {
+    } catch (err) {
       // better save it to log file
       console.error(err);
 
       return res.status(500).json({ msg: 'Internal server error' });
-    });
+    }
   };
 
-  const getAll = (req, res) {
-    Model.findAll().then((models) => {
+  const getAll = async (req, res) => {
+    try {
+      const model = await Model.findAll();
+
       if(!models){
         return res.status(400).json({ msg: 'Bad Request: Models not found' });
       }
 
       return res.status(200).json({ models });
-    }).catch((err) => {
+    } catch (err) {
       // better save it to log file
       console.error(err);
 
       return res.status(500).json({ msg: 'Internal server error' });
-    });
+    }
   };
 
-  const get = (req, res) => {
+  const get = async (req, res) => {
     // params is part of an url
-    const id = req.params.id;
+    const { id } = req.params;
 
-    Model.findOne({
-      where: {
-        id,
-      },
-    }).then((model) => {
+    try {
+      const model = await Model.findOne({
+        where: {
+          id,
+        },
+      });
+
       if(!model) {
         return res.status(400).json({ msg: 'Bad Request: Model not found' });
       }
 
       return res.status(200).json({ model });
-    }).catch((err) => {
+    } catch (err) {
       // better save it to log file
       console.error(err);
 
       return res.status(500).json({ msg: 'Internal server error' });
-    });
+    }
   };
 
-  const update = (req, res) => {
+  const update = async (req, res) => {
     // params is part of an url
-    const id = req.params.id;
+    const { id } = req.params;
 
     // body is part of form-data
-    const value = req.body.value;
+    const { value } = req.body;
 
-    Model.findById(id).then((model) => {
+    try {
+      const model = await Model.findById(id);
+
       if(!model) {
         return res.status(400).json({ msg: 'Bad Request: Model not found' });
       }
 
-      return model
-        .update({
-          key: value,
-        }).then((updatedModel) => {
-          return res.status(200).json({ updatedModel });
-        });
-    }).catch((err) => {
+      const updatedModel = await model.update({
+        key: value,
+      )};
+
+      return res.status(200).json({ updatedModel });
+    } catch (err) {
       // better save it to log file
       console.error(err);
 
       return res.status(500).json({ msg: 'Internal server error' });
-    });
+    }
   };
 
-  const destroy = (req, res) => {
+  const destroy = async (req, res) => {
     // params is part of an url
-    const id = req.params.id;
+    const { id } = req.params;
 
-    Model.findById(id).then((model) => {
+    try {
+      const model =  Model.findById(id);
+
       if(!model) {
         return res.status(400).json({ msg: 'Bad Request: Model not found' })
       }
 
-      model.destroy().then(() => {
-        return res.status(200).json({ msg: 'Successfully destroyed model' });
-      }).catch((err) => {
-        // better save it to log file
-        console.error(err);
+      await model.destroy();
 
-        return res.status(500).json({ msg: 'Internal server error' });
-      });
-    }).catch((err) => {
+      return res.status(200).json({ msg: 'Successfully destroyed model' });
+    } catch (err) {
       // better save it to log file
       console.error(err);
 
       return res.status(500).json({ msg: 'Internal server error' });
-    });
+    }
   };
 
   // IMPORTANT
@@ -236,8 +213,6 @@ const ModelController = () => {
   };
 };
 
-// IMPORTANT
-// don't forget to export the Controller
 model.exports = ModelController;
 ```
 
@@ -265,19 +240,6 @@ const hooks = {
   },
 };
 
-// instanceMethods are functions that run on instances of our model
-// toJSON runs before delivering it to our client
-// we delete the password, that the client has no sensitive data
-const instanceMethods = {
-  toJSON() {
-    const values = Object.assign({}, this.get());
-
-    delete values.password;
-
-    return values;
-  },
-};
-
 // naming the table in DB
 const tableName = 'users';
 
@@ -290,7 +252,20 @@ const User = sequelize.define('User', {
   password: {
     type: Sequelize.STRING,
   },
-}, { hooks, instanceMethods, tableName });
+}, { hooks, tableName });
+
+// instead of using instanceMethod
+// in sequelize > 4 we are writing the function
+// to the prototype object of our model.
+// as we do not want to share sensitive data, the password
+// field gets ommited before sending
+User.prototype.toJSON = function () {
+  const values = Object.assign({}, this.get());
+
+  delete values.password;
+
+  return values;
+};
 
 // IMPORTANT
 // don't forget to export the Model
@@ -331,7 +306,7 @@ api.js
 ```js
 const adminPolicy = require('./policies/admin.policy');
 
-app.all('/admin/*', (req,res,next) => adminPolicy(req,res,next));
+app.all('/admin/*', (req, res, next) => adminPolicy(req,res,next));
 ```
 
 Or for one specific route
@@ -342,8 +317,8 @@ api.js
 const adminPolicy = require('./policies/admin.policy');
 
 app.get('/admin/myroute',
-  (req,res,next) => adminPolicy(req,res,next),
-  (req,res) => {
+  (req, res, next) => adminPolicy(req,res,next),
+  (req, res) => {
   //do some fancy stuff
 });
 ```
@@ -383,17 +358,25 @@ Example service:
 Get comments from another API:
 
 ```js
-module.exports = {
-  getComments: () => (
-    fetch('https://jsonplaceholder.typicode.com/comments', {
-      method: 'get'
-    }).then(function(res) {
+const commentService = () => {
+  const getComments = async () => {
+    try {
+      const res = await fetch('https://jsonplaceholder.typicode.com/comments', {
+        method: 'get'
+      });
+
       // do some fancy stuff with the response
-    }).catch(function(err) {
-      // Error :(
-    })
-  );
+    } catch (err) {
+      // handle a error
+    }
+  };
+
+  return {
+    getComments,
+  };
 };
+
+module.exports = commentService;
 ```
 
 ## Config
@@ -428,7 +411,7 @@ Now simple configure the keys with your credentials.
 
 To not configure the production code.
 
-To start let the DB now the credentials for production, add `environment variables` by typing e.g. `export DB_USER_ENV=yourusername` before starting the api.
+To start the DB, add the credentials for production. add `environment variables` by typing e.g. `export DB_USER=yourusername` before starting the api.
 
 ## Routes
 
@@ -440,18 +423,20 @@ For further information read the [docs](https://github.com/aichbauer/express-rou
 
 Example for User Model:
 
-> Note: Only supported Methods are **POST**, **GET**, **PUT**, and **DELETE**. So no **PATCH** for updates, etc...
+> Note: Only supported Methods are **POST**, **GET**, **PUT**, and **DELETE**.
 
 userRoutes.js
 
 ```js
-module.exports = {
+const userRoutes = {
   'POST /user': 'UserController.create',
   'GET /users': 'UserController.getAll',
   'GET /user/:id': 'UserController.get',
   'PUT /user/:id': 'UserController.update',
   'DELETE /user/': 'UserController.destroy',
 };
+
+module.exports = userRoutes;
 ```
 
 To use these routes in your application, require them in the config/index.js and export them.
@@ -459,10 +444,12 @@ To use these routes in your application, require them in the config/index.js and
 ```js
 const userRoutes = require('./userRoutes');
 
-module.exports = {
+const config = {
   allTheOtherStuff,
   userRoutes,
 };
+
+module.exports = config;
 ```
 
 api.js
@@ -478,7 +465,7 @@ app.all('/prefix/*', (req, res, next) => auth(req, res, next));
 
 ## Test
 
-All test for this boilerplate uses [AVA](https://github.com/avajs/ava) and [supertest](https://github.com/visionmedia/superagent) for integration testing. So read their docs on further information.
+All test for this boilerplate uses [Jest](https://github.com/facebook/jest) and [supertest](https://github.com/visionmedia/superagent) for integration testing. So read their docs on further information.
 
 ### Setup
 
@@ -495,7 +482,6 @@ To test a Controller we create `fake requests` to our api routes.
 Example `GET /user` from last example with prefix `prefix`:
 
 ```js
-const test = require('ava');
 const request = require('supertest');
 const {
   beforeAction,
@@ -504,35 +490,33 @@ const {
 
 let api;
 
-test.before(async () => {
+beforeAll(async () => {
   api = await beforeAction();
 });
 
-test.after(() => {
+afterAll(() => {
   afterAction();
 });
 
-test('test', async (t) => {
+test('test', async () => {
   const token = 'this-should-be-a-valid-token';
 
-  await request(api)
-  .get('/prefix/user')
-  .set('Accept', /json/)
-  // if auth is needed
-  .set('Authorization', `Bearer ${token}`)
-  .set('Content-Type', 'application/json')
-  .expect(200)
-  .then((res) => {
-    // do some fancy stuff
-    t.truthy(res.body.users);
-  });
-});
+  const res = await request(api)
+    .get('/prefix/user')
+    .set('Accept', /json/)
+    // if auth is needed
+    .set('Authorization', `Bearer ${token}`)
+    .set('Content-Type', 'application/json')
+    .expect(200);
 
+  // read the docs of jest for further information
+  expect(res.body.user).toBe('something');
+});
 ```
 
 ### Models
 
-Are usually automatically tested as the Controller uses the Models, but you can test them separatly.
+Are usually automatically tested in the integration tests as the Controller uses the Models, but you can test them separatly.
 
 ## npm scripts
 
@@ -542,10 +526,12 @@ There are no automation tool or task runner like [grunt](https://gruntjs.com/) o
 
 This is the entry for a developer. This command:
 
-- a **nodemon watch task** for the all files conected to `.api/api.js`
+By default it uses a sqlite databse, if you want to migrate the sqlite db by each start, disable the `prestart` and `poststart` command. Also mind if you are using a sqlite database to delete the `drop-sqlite-db` in the prepush hook.
+
+- runs **nodemon watch task** for the all files conected to `.api/api.js`
 - sets the **environment variable** `NODE_ENV` to `development`
 - opens the db connection for `development`
-- starts the server on 127.0.0.1:3333
+- starts the server on 127.0.0.1:2017
 
 ### npm test
 
@@ -553,8 +539,9 @@ This command:
 
 - runs `npm run lint` ([eslint](http://eslint.org/)) with the [airbnb styleguide](https://github.com/airbnb/javascript) without arrow-parens rule for **better readability**
 - sets the **environment variable** `NODE_ENV` to `testing`
-- runs `nyc` the cli-tool for [istanbul](https://istanbul.js.org/) for test coverage
-- runs `ava -s` for testing with [AVA](https://github.com/avajs/ava)
+- creates the `database.sqlite` for the test
+- runs `jest --coverage` for testing with [Jest](https://github.com/facebook/jest) and the coverage
+- drops the `database.sqlite` after the test
 
 ## npm run production
 
@@ -562,23 +549,25 @@ This command:
 
 - sets the **environment variable** to `production`
 - opens the db connection for `production`
-- starts the server on 127.0.0.1:3333 or on 127.0.0.1:PORT_ENV
+- starts the server on 127.0.0.1:2017 or on 127.0.0.1:PORT_ENV
 
 Before running on production you have to set the **environment vaiables**:
 
-- DB_ENV - database name
-- DB_USER_ENV - user for the production database
-- DB_PW_ENV - password for production database user
-- SECRET_ENV - secret for json web token
+- DB_NAME - database name for production
+- DB_USER - database username for production
+- DB_PASS - database password for production
+- DB_HOST - database host for production
+- JWT_SECERT - secret for json web token
 
 Optional:
 
-- PORT_ENV - the port your api on 127.0.0.1, default to 3333
+- PORT - the port your api on 127.0.0.1, default to 2017
 
 ### other commands
 
 - `npm run dev` - simply start the server withou a watcher
-- `npm run dropDB` - drops **ONLY** the sqlite database
+- `npm run create-sqlite-db` - creates the sqlite database
+- `npm run drop-sqlite-db` - drops **ONLY** the sqlite database
 - `npm run lint` - linting with [eslint](http://eslint.org/)
 - `npm run nodemon` - same as `npm start``
 - `npm run prepush` - a hook wich runs before pushing to a repository, runs `npm test` and `npm run dropDB`
@@ -588,4 +577,3 @@ Optional:
 ## LICENSE
 
 MIT © Lukas Aichbauer
-

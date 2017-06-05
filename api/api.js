@@ -6,25 +6,30 @@ const express = require('express');
 const helmet = require('helmet');
 const http = require('http');
 const mapRoutes = require('express-routes-mapper');
+const cors = require('cors');
 
 /**
  * server configuration
  */
 const config = require('../config/');
-const database = require('../config/database');
+const dbService = require('./services/db.service');
 const auth = require('./policies/auth.policy');
+
+// environment: development, staging, testing, production
+const environment = process.env.NODE_ENV;
 
 /**
  * express application
  */
 const app = express();
 const server = http.Server(app);
-const port = process.env.PORT_ENV || config.port;
 const mappedOpenRoutes = mapRoutes(config.publicRoutes, 'api/controllers/');
 const mappedAuthRoutes = mapRoutes(config.privateRoutes, 'api/controllers/');
+const DB = dbService(environment, config.migrate).start();
 
-// environment: development, testing, production
-const environment = process.env.NODE_ENV;
+// allow cross origin requests
+// configure to only allow requests from certain origins
+app.use(cors());
 
 // secure express app
 app.use(helmet({
@@ -37,54 +42,14 @@ app.use(helmet({
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-// fill routes for express appliction
-app.use('/public', mappedOpenRoutes);
-app.use('/private', mappedAuthRoutes);
-
 // secure your private routes with jwt authentication middleware
 app.all('/private/*', (req, res, next) => auth(req, res, next));
 
-/**
- * Database
- *
- * uses the database for your environment
- * defined in config/connection.js (development, testing, production)
- *
- * default: drop db for development, keep for production
- * defined in config/index.js (keep)
- */
-const DB = database
-  .authenticate()
-  .then(() => {
-    if (environment === 'development' &&
-      config.keep === false) {
-      return database
-        .drop()
-        .then(() => (
-          database
-            .sync()
-            .then(() => {
-              console.log(`There we go ♕\nStarted in ${environment}\nGladly listening on http://127.0.0.1:${port}`);
-              console.log('Connection to the database has been established successfully');
-            })
-            .catch((err) => console.error('Unable to connect to the database:', err))
-        ))
-        .catch((err) => console.error('Unable to connect to the database:', err));
-    }
+// fill routes for express application
+app.use('/public', mappedOpenRoutes);
+app.use('/private', mappedAuthRoutes);
 
-    // keep data in database after restart
-    return database
-      .sync()
-      .then(() => {
-        console.log(`There we go ♕\nStarted in ${environment}\nGladly listening on http://127.0.0.1:${port}`);
-        console.log('Connection to the database has been established successfully');
-      });
-  })
-  .catch((err) => {
-    console.error('Unable to connect to the database:', err);
-  });
-
-server.listen(port, () => {
+server.listen(config.port, () => {
   if (environment !== 'production' &&
     environment !== 'development' &&
     environment !== 'testing'
