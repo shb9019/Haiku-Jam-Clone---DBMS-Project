@@ -6,35 +6,32 @@ const UserController = () => {
   const register = async (req, res) => {
     const { body } = req;
 
-    if (body.password === body.password2) {
-      try {
-        const user = await User.create({
-          email: body.email,
-          password: body.password,
-        });
-        const token = authService().issue({ id: user.id });
+    try {
+      body.password = bcryptService().password(body);
+      const user = User.create({
+        username: body.username,
+        password: body.password,
+        name: body.name,
+        bio: body.bio,
+      });
+      const token = authService().issue({ id: user.id });
 
-        return res.status(200).json({ token, user });
-      } catch (err) {
-        console.log(err);
-        return res.status(500).json({ msg: 'Internal server error' });
-      }
+      return res.status(200).json({ token, user });
+    } catch (err) {
+      return res.status(500).json({ msg: 'Internal server error' });
     }
-
-    return res.status(400).json({ msg: 'Bad Request: Passwords don\'t match' });
   };
 
   const login = async (req, res) => {
-    const { email, password } = req.body;
+    const { username, password } = req.body;
 
-    if (email && password) {
+    if (username && password) {
       try {
-        const user = await User
-          .findOne({
-            where: {
-              email,
-            },
-          });
+        const user = await User.findOne({
+          where: {
+            username,
+          },
+        });
 
         if (!user) {
           return res.status(400).json({ msg: 'Bad Request: User not found' });
@@ -42,6 +39,10 @@ const UserController = () => {
 
         if (bcryptService().comparePassword(password, user.password)) {
           const token = authService().issue({ id: user.id });
+
+          req.session.username = username;
+          req.session.isloggedin = true;
+          req.session.user_id = user.user_id;
 
           return res.status(200).json({ token, user });
         }
@@ -79,12 +80,22 @@ const UserController = () => {
     }
   };
 
+  const isLoggedIn = async (req, res) => {
+    try {
+      return res.status(200).json({ isloggedin: req.session.isloggedin });
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json({ msg: 'Internal server error' });
+    }
+  };
+
 
   return {
     register,
     login,
     validate,
     getAll,
+    isLoggedIn,
   };
 };
 

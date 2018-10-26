@@ -1,23 +1,33 @@
 const Sequelize = require('sequelize');
-const bcryptService = require('../services/bcrypt.service');
-
 const sequelize = require('../../config/database');
 
-const hooks = {
-  beforeCreate(user) {
-    user.password = bcryptService().password(user); // eslint-disable-line no-param-reassign
-  },
-};
+const hooks = {};
 
 const tableName = 'users';
 
 const User = sequelize.define('User', {
-  email: {
+  user_id: {
+    type: Sequelize.INTEGER,
+    autoIncrement: true,
+    unique: true,
+    primaryKey: true,
+  },
+  username: {
     type: Sequelize.STRING,
+    allowNull: false,
     unique: true,
   },
   password: {
     type: Sequelize.STRING,
+    allowNull: false,
+  },
+  name: {
+    type: Sequelize.STRING,
+    allowNull: false,
+  },
+  bio: {
+    type: Sequelize.TEXT,
+    allowNull: true,
   },
 }, { hooks, tableName });
 
