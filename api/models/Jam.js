@@ -1,5 +1,6 @@
 const Sequelize = require('sequelize');
 const sequelize = require('../../config/database');
+const User = require('./User');
 
 const hooks = {};
 
@@ -26,21 +27,25 @@ const Jam = sequelize.define('Jam', {
   },
   user_id_1: {
     type: Sequelize.INTEGER,
-    defaultValue: -1,
+    defaultValue: null,
   },
   user_id_2: {
     type: Sequelize.INTEGER,
-    defaultValue: -1,
+    defaultValue: null,
   },
   user_id_3: {
     type: Sequelize.INTEGER,
-    defaultValue: -1,
+    defaultValue: null,
   },
   is_complete: {
     type: Sequelize.BOOLEAN,
     defaultValue: false,
   },
 }, { hooks, tableName });
+
+Jam.belongsTo(User, { foreignKey: 'user_id_1', targetKey: 'user_id' });
+Jam.belongsTo(User, { foreignKey: 'user_id_2', targetKey: 'user_id' });
+Jam.belongsTo(User, { foreignKey: 'user_id_3', targetKey: 'user_id' });
 
 // eslint-disable-next-line
 Jam.prototype.toJSON = function () {

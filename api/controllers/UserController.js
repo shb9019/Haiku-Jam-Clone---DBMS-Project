@@ -14,9 +14,28 @@ const UserController = () => {
         name: body.name,
         bio: body.bio,
       });
-      const token = authService().issue({ id: user.id });
 
-      return res.status(200).json({ token, user });
+      return res.status(200).json({ user });
+    } catch (err) {
+      return res.status(500).json({ msg: 'Internal server error' });
+    }
+  };
+
+  const checkUsername = async (req, res) => {
+    const { body } = req;
+
+    try {
+      const user = await User.find({
+        where: {
+          username: body.username,
+        },
+      });
+
+      if (user) {
+        return res.status(400).json({ msg: 'Username already exists' });
+      }
+
+      return res.status(200).json({ msg: 'OK' });
     } catch (err) {
       return res.status(500).json({ msg: 'Internal server error' });
     }
@@ -34,17 +53,14 @@ const UserController = () => {
         });
 
         if (!user) {
-          return res.status(400).json({ msg: 'Bad Request: User not found' });
+          return res.status(400).json({ msg: 'User not found' });
         }
 
         if (bcryptService().comparePassword(password, user.password)) {
-          const token = authService().issue({ id: user.id });
-
           req.session.username = username;
           req.session.isloggedin = true;
           req.session.user_id = user.user_id;
-
-          return res.status(200).json({ token, user });
+          return res.status(200).json({ user });
         }
 
         return res.status(401).json({ msg: 'Unauthorized' });
@@ -89,13 +105,37 @@ const UserController = () => {
     }
   };
 
+  const getUserDetails = async (req, res) => {
+    try {
+      const userDetails = await User.find({
+        user_id: req.session.user_id,
+      });
+      return res.status(200).json({ userDetails });
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json({ msg: 'Internal server error' });
+    }
+  };
+
+  const logout = async (req, res) => {
+    try {
+      req.session.isloggedin = false;
+      return res.status(200).json({});
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json({ msg: 'Internal server error' });
+    }
+  };
 
   return {
     register,
     login,
     validate,
+    checkUsername,
     getAll,
     isLoggedIn,
+    getUserDetails,
+    logout,
   };
 };
 

@@ -21,7 +21,7 @@ const JamController = () => {
     const { body } = req;
 
     try {
-      const jam = Jam.find({
+      const jam = await Jam.find({
         where: {
           jam_id: body.jam_id,
         },
@@ -35,12 +35,20 @@ const JamController = () => {
         Jam.update({
           user_id_2: req.session.user_id,
           verse_2: body.verse,
+        }, {
+          where: {
+            jam_id: body.jam_id,
+          },
         });
       } else {
         Jam.update({
           user_id_3: req.session.user_id,
           verse_3: body.verse,
           is_complete: true,
+        }, {
+          where: {
+            jam_id: body.jam_id,
+          },
         });
       }
 
@@ -53,7 +61,7 @@ const JamController = () => {
 
   const getMyJams = async (req, res) => {
     try {
-      const jams = Jam.findAll({
+      const jams = await Jam.findAll({
         $or: [
           {
             user_id_1: {
@@ -73,7 +81,7 @@ const JamController = () => {
         ],
       });
 
-      return res.json(200).json({ jams });
+      return res.status(200).json({ jams });
     } catch (err) {
       console.log(err);
       return res.status(500).json({ msg: 'Internal Server Error' });
@@ -82,7 +90,7 @@ const JamController = () => {
 
   const getCompletedJams = async (req, res) => {
     try {
-      const jams = Jam.findAll({
+      const jams = await Jam.findAll({
         where: {
           is_complete: true,
         },
@@ -97,19 +105,22 @@ const JamController = () => {
 
   const getIncompleteJams = async (req, res) => {
     try {
-      const jams = Jam.findAll({
+      const jams = await Jam.findAll({
         where: {
           is_complete: false,
-          user_id_1: {
-            ne: req.session.user_id,
-          },
-          user_id_2: {
-            ne: req.session.user_id,
-          },
         },
       });
 
-      return res.status(200).json({ jams });
+      const userId = req.session.user_id;
+
+      const finalJams = [];
+      jams.forEach((element) => {
+        if (element.user_id_1 !== userId && element.user_id_2 !== userId) {
+          finalJams.push(element);
+        }
+      });
+
+      return res.status(200).json({ jams: finalJams });
     } catch (err) {
       console.log(err);
       return res.status(500).json({ msg: 'Internal Server Error' });
