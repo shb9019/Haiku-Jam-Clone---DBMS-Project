@@ -1,17 +1,17 @@
 const development = {
-  database: 'databasename',
-  username: 'username',
-  password: 'password',
+  database: 'HaikuJam',
+  username: 'root',
+  password: 'root',
   host: 'localhost',
-  dialect: 'sqlite' || 'mysql' || 'postgres',
+  dialect: 'mysql',
 };
 
 const testing = {
-  database: 'databasename',
-  username: 'username',
-  password: 'password',
+  database: 'HaikuJam',
+  username: 'root',
+  password: 'root',
   host: 'localhost',
-  dialect: 'sqlite' || 'mysql' || 'postgres',
+  dialect: 'mysql',
 };
 
 const production = {
