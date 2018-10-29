@@ -1,0 +1,31 @@
+<html>
+<head>
+<title>Login Page</title>
+<link rel="stylesheet" href="css/login.css">
+<script src="js/login.js"></script>
+</head>
+<body >
+  <br>  
+  <h1 align = "center" > HaikuJam! Connect with Words </h1>
+  <br>
+
+  <ul>
+  <li><a class="active" href="./login.html">LOGIN</a></li>
+  <li><a href="./signup.html">SIGN UP</a></li>
+  </ul>
+
+  <br>
+  <h3 align = "center" > LOGIN FORM </h3>
+
+  <form align = "center"  onsubmit="return false">
+     Username:<br>
+     <input type="text" id="username" placeholder="Enter username" name="username" >
+     <br>
+     Password:<br>
+     <input type="text" id="password" placeholder="Enter password" name="password"  >
+     <br><br>
+     <input type="submit" id = "submit" value="Submit" onclick="validate()">
+  </form>
+
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Jams</title>
+	<link rel="stylesheet" href="css/messages.css">
+  <link href="https://use.fontawesome.com/releases/v5.0.7/css/all.css" rel="stylesheet">
+    <script src="js/messages.js"></script>
+</head>
+<body>
+
+  <h1 align = "center" > HaikuJam! Connect with Words </h1>	
+  <ul>
+  <li><a class="active" href="./profile.html">PROFILE</a></li>
+  <li><a href="./messages.html">MESSAGES</a></li>
+  <li><a href="./login.html"><i class="fas fa-sign-out-alt"></i></a></li>
+  </ul>
+  <div id="newjam">
+  	<h2>Create Your new Jam</h2>
+    <form align = "center"  onsubmit="return false">
+     Heading:<br>
+     <input type="text" id="jamheading" placeholder="Enter heading" name="jam heading">
+     <br>
+     Poem Line:<br>
+     <input type="text" id="jamtext" placeholder="Enter Jam" name="jamtext" >
+     <br>
+     <input type="submit" id = "submit" value="Submit" onclick="validate()">
+  </form>
+  </div>
+
+  <br>
+  <h2 id="x1">Add Changes to existing jams!!!</h2>
+  <div id="message">
+  	<!--<h2 id="id1">Add new lines to these Jams!!</h2>-->
+  	<div id="left"><a href = "" ><h3>&#10094&#10094</h3></a></div>
+  	<div id="right"><a href ="" ><h3>&#10095&#10095</h3></a></div>
+    
+    
+  <table>
+    <caption><h3>BReakUP!!</h3></caption>
+    <tr>
+     <td>bhenchod 100 century maarega there baap</td>
+     <td>Smith</td>
+    </tr>
+    <tr>
+     <td>Eve</td>
+     <td>Jackson</td>
+    </tr>
+    <tr>
+     <td> <INPUT TYPE="TEXT" class = "tobefilled" placeholder="Enter message" NAME="name" SIZE="35"></td>
+     <td> <INPUT TYPE="TEXT" class = "tobefilled" placeholder="Enter my name" NAME="name" SIZE="5"></td>
+    </tr>
+  </table>
+     <br>
+     <input type="submit" id = "submit2" value="Submit" onclick="validate1()">	
+    </div>
+    
+  </div>
+  	
+
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>editDetails</title>
+	<link rel="stylesheet" href="css/editDetails.css">
+  <script src="js/editDetails.js"></script>
+  <link href="https://use.fontawesome.com/releases/v5.0.7/css/all.css" rel="stylesheet">
+
+</head>
+<body>
+	<br>
+  <h1 align = "center" > HaikuJam! Connect with Words </h1>
+  <br>
+
+  <ul>
+  <li><a class="active" href="./profile.html">PROFILE</a></li>
+  <li><a href="./messages.html">MESSAGES</a></li>
+  <li><a href="./login.html"><i class="fas fa-sign-out-alt"></i></a></li>
+  </ul>
+   <br>
+  <h2 align = "center" > Edit Your Details </h2>
+
+  <form align = "center"  onsubmit="return false">
+     Edit Bio:<br>
+     <input type="text" id="bio" placeholder="Enter new bio" name="username" >
+     <br>
+     Old Password:<br>
+     <input type="text" id="oldpassword" placeholder="Enter old password" name="password" >
+     <br>
+     New Password:<br>
+     <input type="text" id="newpassword" placeholder="Enter new password" name="password"  >
+     <br><br>
+     <input type="submit" id = "submit" value="Submit" onclick="validate()">
+  </form>
+
+
+</body>
+</html>
