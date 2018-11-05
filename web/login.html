@@ -29,6 +29,26 @@
 	<p id="error-message"></p>
 </form>
 <script>
+
+	function checkLoggedIn() {
+		fetch('http://localhost:3000/isloggedin', {
+				method: "GET",
+				credentials: 'include',
+				headers: {
+					'Accept': 'application/json',
+					'Content-Type': 'application/json',
+				},
+			}).then((response) => {
+				return response.json();
+			}).then((data) => {
+				if(data.isloggedin && data.isloggedin == true) {
+					window.location = 'http://localhost:8080/profile.html';
+				}
+			}).catch((error) => {
+				console.log(error);
+			});
+	}
+
 	function validate() {
 		let username = document.getElementById("username").value;
 		let password = document.getElementById("password").value;
@@ -44,7 +64,6 @@
 				password: password
 			})
 		}).then((response) => {
-			console.log(response);
 			if (response.status == 200) {
 				window.location = 'http://localhost:8080/messages.html';
 			}
@@ -55,6 +74,8 @@
 			console.log(error);
 		});
 	}
+
+	checkLoggedIn();
 </script>
 </body>
 </html>

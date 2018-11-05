@@ -10,20 +10,84 @@
 <h1 align = "center" > HaikuJam! Connect with Words </h1>
 <br>
 <ul>
-  <li><a class="active" href="./profile.html">PROFILE</a></li>
-  <li><a href="./messages.html">MESSAGES</a></li>
-  <li><a href="./login.html"><i class="fas fa-sign-out-alt"></i></a></li>
-  </ul>
+	<li><a class="active" href="./profile.html">PROFILE</a></li>
+	<li><a href="./messages.html">MESSAGES</a></li>
+	<li><a href="javascript:void(0)" onclick="logout()"><i class="fas fa-sign-out-alt"></i></a></li>
+	</ul>
 <br>
-<h2 style="text-align:center">User Profile </h2>
 
 <div id="card">
-  <img src="images/profile-pic.png" alt="User" style="width:100%">
-  <h1 id="username">John Doe</h1>
-  <p id="bio">I am a song enthusiasist.deeply fucking fuckboii.</p>
-  <br>
+	<img src="images/profile-pic.png" alt="User" style="width:100%">
+	<h1 id="name"></h1>
+	<h3 id="username"></h3>
+	<p id="bio"></p>
+	<br>
  <input type="submit" id = "submit" value="Edit Details" onclick="validate()">
 </div>
+<script>
+	function checkLoggedIn() {
+	fetch('http://localhost:3000/isloggedin', {
+			method: "GET",
+			credentials: 'include',
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json',
+			},
+		}).then((response) => {
+			return response.json();
+		}).then((data) => {
+			if(!data.isloggedin || data.isloggedin == false) {
+				window.location = 'http://localhost:8080/login.html';
+			}
+		}).catch((error) => {
+			console.log(error);
+		});
+	}
+	
+	function fetchData() {
+		fetch('http://localhost:3000/getDetails', {
+			method: "GET",
+			credentials: 'include',
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json',
+			},
+		}).then((response) => {
+			return response.json();
+		}).then((data) => {
+			data = data.userDetails;
+			document.getElementById("name").innerHTML = data.name;
+			document.getElementById("username").innerHTML = data.username;
+			if(data.bio)
+				document.getElementById("bio").innerHTML = data.bio;
+			else {
+				document.getElementById("bio").innerHTML = "No Bio yet";
+			}
+		}).catch((error) => {
+			console.log(error);
+		});
+	}
 
+	function logout() {
+		fetch('http://localhost:3000/logout', {
+			method: "GET",
+			credentials: 'include',
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json',
+			},
+		}).then((response) => {
+			console.log(response);
+			checkLoggedIn();
+			return response.json();
+		}).then((data) => {
+		}).catch((error) => {
+			console.log(error);
+		});
+	}
+
+	checkLoggedIn();
+	fetchData();
+</script>
 </body>
 </html>
