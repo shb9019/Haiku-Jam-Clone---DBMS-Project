@@ -161,20 +161,20 @@ const JamController = () => {
           finalJams.push(element);
         }
       });
-      
+
       if (finalJams.length === 0) {
         ReadJam.destroy({
           where: {
             user_id: req.session.user_id,
           },
         });
-        
+
         readJams = await ReadJam.findAll({ attributes: ['jam_id'] }, {
           where: {
             user_id: req.session.user_id,
           },
         });
-        
+
         jams = await Jam.findAll({
           where: {
             is_complete: false,
