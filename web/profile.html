@@ -11,7 +11,7 @@
 <br>
 <ul>
 	<li><a class="active" href="./profile.html">PROFILE</a></li>
-	<li><a href="./messages.html">MESSAGES</a></li>
+	<li><a href="./jams.html">Jams</a></li>
 	<li><a href="javascript:void(0)" onclick="logout()"><i class="fas fa-sign-out-alt"></i></a></li>
 	</ul>
 <br>
@@ -26,7 +26,7 @@
 </div>
 <script>
 	function checkLoggedIn() {
-	fetch('http://localhost:3000/isloggedin', {
+		fetch('http://localhost:3000/isloggedin', {
 			method: "GET",
 			credentials: 'include',
 			headers: {
@@ -56,6 +56,7 @@
 			return response.json();
 		}).then((data) => {
 			data = data.userDetails;
+			console.log(data);
 			document.getElementById("name").innerHTML = data.name;
 			document.getElementById("username").innerHTML = data.username;
 			if(data.bio)

@@ -105,10 +105,54 @@ const UserController = () => {
 
   const getUserDetails = async (req, res) => {
     try {
+      console.log(req.session.user_id);
       const userDetails = await User.find({
-        user_id: req.session.user_id,
+        where: {
+          user_id: req.session.user_id,
+        },
       });
       return res.status(200).json({ userDetails });
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json({ msg: 'Internal server error' });
+    }
+  };
+
+  const updateBio = async (req, res) => {
+    const { body } = req;
+    if (req.session.isloggedin === false) {
+      return res.status(404).json({ msg: 'Please Log In' });
+    }
+    try {
+      User.update({
+        bio: body.bio,
+      }, {
+        where: {
+          user_id: req.session.user_id,
+        },
+      });
+      return res.status(200).json({});
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json({ msg: 'Internal server error' });
+    }
+  };
+
+  const changePassword = async (req, res) => {
+    const { body } = req;
+    if (req.session.isloggedin === false) {
+      return res.status(404).json({ msg: 'Please Log In' });
+    }
+    try {
+      body.password = bcryptService().password(body);
+      User.update({
+        password: body.password,
+      }, {
+        where: {
+          user_id: req.session.user_id,
+        },
+      });
+      return res.status(200).json({});
     } catch (err) {
       console.log(err);
       return res.status(500).json({ msg: 'Internal server error' });
@@ -130,6 +174,8 @@ const UserController = () => {
     login,
     validate,
     checkUsername,
+    updateBio,
+    changePassword,
     getAll,
     isLoggedIn,
     getUserDetails,

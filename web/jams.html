@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Jams</title>
+	<link rel="stylesheet" href="css/messages.css">
+	<link href="https://use.fontawesome.com/releases/v5.0.7/css/all.css" rel="stylesheet">
+		<script src="js/messages.js"></script>
+</head>
+<body>
+
+	<h1 align="center" > HaikuJam! Connect with Words </h1>
+	<ul>
+	<li><a class="active" href="./profile.html">Profile</a></li>
+	<li><a href="./jams.html">Jams</a></li>
+	<li><a href="javascript:void(0)" onclick="logout()"><i class="fas fa-sign-out-alt"></i></a></li>
+	<div id="newjam">
+		<h2>Create Your new Jam</h2>
+		<div align="center"  onsubmit="return false">
+			Heading<br>
+			<input type="text" id="jamheading" placeholder="Enter heading" name="jam heading">
+			<br>
+			Poem Line<br>
+			<input type="text" id="jamtext" placeholder="Enter Jam" name="jamtext" >
+			<br>
+			<input type="submit" id = "submit" value="Submit" onclick="createJam()">
+		</div>
+	</div>
+
+	<br>
+	<h2 id="x1">Add Changes to existing jams!!!</h2>
+	<div id="message">
+		<div id="right" onclick="fetchNextJam()"><a href ="" ><h3>&#10095&#10095</h3></a></div>
+
+		<table>
+			<caption><h3></h3></caption>
+			<tr id="verse1">
+			</tr>
+			<tr id="verse2">
+			</tr>
+			<tr id="verse3">
+			</tr>
+		</table>
+		 <br>
+		 <input type="submit" id = "submit2" value="Submit" onclick="addToJam()">
+		</div>
+
+	</div>
+<script>
+	let line = -1;
+	let jam_id = -1;
+	function createJam() {
+		let heading = document.getElementById("jamheading").value;
+		let line = document.getElementById("jamtext").value;
+		console.log(line);
+		fetch('http://localhost:3000/createNewJam', {
+			method: "POST",
+			credentials: 'include',
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				title: heading,
+				verse: line,
+			}),
+		}).then((response) => {
+			return response.json();
+		}).then((data) => {
+			window.location = 'http://localhost:8080/jams.html';
+		}).catch((error) => {
+			console.log(error);
+		});
+	}
+
+	function checkLoggedIn() {
+		fetch('http://localhost:3000/isloggedin', {
+			method: "GET",
+			credentials: 'include',
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json',
+			},
+		}).then((response) => {
+			return response.json();
+		}).then((data) => {
+			if(!data.isloggedin || data.isloggedin == false) {
+				window.location = 'http://localhost:8080/login.html';
+			}
+		}).catch((error) => {
+			console.log(error);
+		});
+	}
+
+	function fetchNextJam() {
+		fetch('http://localhost:3000/nextJam', {
+			method: "GET",
+			credentials: 'include',
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json',
+			},
+		}).then((response) => {
+			return response.json();
+		}).then((data) => {
+			console.log(data);
+			updateFeed(data.jam);
+		}).catch((error) => {
+			console.log(error);
+		});
+	}
+
+	function updateFeed(jam) {
+		if(jam == null) {
+			document.getElementById("verse1").innerHTML = '<td> No Jams Available </td>';
+		} else {
+			jam_id = jam.jam_id;
+			document.getElementById("verse1").innerHTML = '<td>' + jam.verse_1 + '</td>' + '<td> User: ' + jam.user_name_1 + '</td>';
+			if(jam.user_id_2) {
+				line = 2;
+				document.getElementById("verse2").innerHTML = '<td>' + jam.verse_2 + '</td>' + '<td> User: ' + jam.user_name_2 + '</td>';
+				document.getElementById("verse3").innerHTML = '<td> <INPUT TYPE="TEXT" id="verse_add" class = "tobefilled" placeholder="Enter next line" name="verse" size="70"></td> <td></td>';
+			}
+			else {
+				line = 3;
+				document.getElementById("verse2").innerHTML = '<td> <INPUT TYPE="TEXT" id="verse_add" class = "tobefilled" placeholder="Enter next line" name="verse" size="70"></td> <td></td>';
+			}
+		}
+	}
+
+	function addToJam() {
+		let verse = document.getElementById("verse_add").value;
+		fetch('http://localhost:3000/addToJam', {
+			method: "POST",
+			credentials: 'include',
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				verse,
+				jam_id,
+			}),
+		}).then((response) => {
+			return response.json();
+		}).then((data) => {
+			console.log(data);
+			updateFeed(data.jam);
+		}).catch((error) => {
+			console.log(error);
+		});
+	}
+
+	function logout() {
+		fetch('http://localhost:3000/logout', {
+			method: "GET",
+			credentials: 'include',
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json',
+			},
+		}).then((response) => {
+			console.log(response);
+			checkLoggedIn();
+			return response.json();
+		}).then((data) => {
+		}).catch((error) => {
+			console.log(error);
+		});
+	}
+
+	checkLoggedIn();
+	setTimeout(() => {
+		fetchNextJam();
+	}, 200);
+
+</script>
+</body>
+</html>

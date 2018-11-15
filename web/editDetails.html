@@ -3,36 +3,113 @@
 <head>
 	<title>editDetails</title>
 	<link rel="stylesheet" href="css/editDetails.css">
-  <script src="js/editDetails.js"></script>
-  <link href="https://use.fontawesome.com/releases/v5.0.7/css/all.css" rel="stylesheet">
+	<link href="https://use.fontawesome.com/releases/v5.0.7/css/all.css" rel="stylesheet">
 
 </head>
 <body>
 	<br>
-  <h1 align = "center" > HaikuJam! Connect with Words </h1>
-  <br>
+	<h1 align = "center" > HaikuJam! Connect with Words </h1>
+	<br>
 
-  <ul>
-  <li><a class="active" href="./profile.html">PROFILE</a></li>
-  <li><a href="./messages.html">MESSAGES</a></li>
-  <li><a href="./login.html"><i class="fas fa-sign-out-alt"></i></a></li>
-  </ul>
-   <br>
-  <h2 align = "center" > Edit Your Details </h2>
+	<ul>
+	<li><a class="active" href="./profile.html">PROFILE</a></li>
+	<li><a href="./messages.html">MESSAGES</a></li>
+	<li><a href="./login.html"><i class="fas fa-sign-out-alt"></i></a></li>
+	</ul>
+	<br>
+	<h2 align = "center" > Edit Your Details </h2>
+	<form align = "center"  onsubmit="return false">
+		Edit Bio:<br>
+		<input type="text" id="bio" placeholder="Enter new bio" name="username" >
+		<br>
+		New Password:<br>
+		<input type="password" id="password" placeholder="Enter new password" name="password"  >
+		<br><br>
+		<input type="submit" id = "submit" value="Submit" onclick="validate()">
+	</form>
+<script>
 
-  <form align = "center"  onsubmit="return false">
-     Edit Bio:<br>
-     <input type="text" id="bio" placeholder="Enter new bio" name="username" >
-     <br>
-     Old Password:<br>
-     <input type="text" id="oldpassword" placeholder="Enter old password" name="password" >
-     <br>
-     New Password:<br>
-     <input type="text" id="newpassword" placeholder="Enter new password" name="password"  >
-     <br><br>
-     <input type="submit" id = "submit" value="Submit" onclick="validate()">
-  </form>
+function checkLoggedIn() {
+	fetch('http://localhost:3000/isloggedin', {
+		method: "GET",
+		credentials: 'include',
+		headers: {
+			'Accept': 'application/json',
+			'Content-Type': 'application/json',
+		},
+	}).then((response) => {
+		return response.json();
+	}).then((data) => {
+		if(!data.isloggedin) {
+			window.location = 'http://localhost:8080/login.html';
+		}
+	}).catch((error) => {
+		console.log(error);
+	});
+}
 
+function validate() {
+	let bio = String(document.getElementById('bio').value);
+	console.log(bio);
+	if (bio !== '') {
+		updateBio(bio);
+	}
 
+	let password = String(document.getElementById('password').value);
+	console.log(password);
+	if (password !== '') {
+		changePassword(password);
+	}
+}
+
+function updateBio(bio) {
+	fetch('http://localhost:3000/updateBio', {
+		method: "POST",
+		credentials: 'include',
+		headers: {
+			'Accept': 'application/json',
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify({
+			bio: bio
+		})
+	}).then((response) => {
+		console.log(response);
+		if (response.status == 200) {
+			alert("Bio Updated !!!");
+		}
+		return response.json();
+	}).then((data) => {
+		console.log(data);
+	}).catch((error) => {
+		console.log(error);
+	});
+}
+
+function changePassword(password) {
+	fetch('http://localhost:3000/changePassword', {
+		method: "POST",
+		credentials: 'include',
+		headers: {
+			'Accept': 'application/json',
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify({
+			password: password
+		})
+	}).then((response) => {
+		if (response.status == 200) {
+			alert("Password Updated !!!");
+		}
+		return response.json();
+	}).then((data) => {
+		console.log(data);
+	}).catch((error) => {
+		console.log(error);
+	});
+}
+
+checkLoggedIn();
+</script>
 </body>
 </html>

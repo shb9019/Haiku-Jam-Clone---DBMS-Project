@@ -13,6 +13,10 @@ const Jam = sequelize.define('Jam', {
     unique: true,
     primaryKey: true,
   },
+  title: {
+    type: Sequelize.STRING,
+    allowNull: false,
+  },
   verse_1: {
     type: Sequelize.STRING,
     defaultValue: null,
