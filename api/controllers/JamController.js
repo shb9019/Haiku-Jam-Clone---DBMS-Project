@@ -2,6 +2,7 @@ const Sequelize = require('sequelize');
 const Jam = require('../models/Jam');
 const User = require('../models/User');
 const ReadJam = require('../models/ReadJam');
+const Likes = require('../models/Likes');
 
 const JamController = () => {
   const createNewJam = async (req, res) => {
@@ -100,6 +101,30 @@ const JamController = () => {
         },
       });
 
+      const like = await Likes.findAll({
+        where: {
+          user_id: req.session.user_id,
+        },
+      });
+
+      const likes = [];
+      if (like) {
+        like.forEach((likeData) => {
+          likes.push(likeData.dataValues.jam_id);
+        });
+      }
+      console.log(likes);
+      if (jams) {
+        jams.forEach((jam, index) => {
+          if (likes && likes.includes(jam.dataValues.jam_id)) {
+            jams[index].dataValues.liked = true;
+          } else {
+            jams[index].dataValues.liked = false;
+          }
+        });
+      }
+      console.log(jams);
+      console.log(jams.dataValues);
       return res.status(200).json({ jams });
     } catch (err) {
       console.log(err);

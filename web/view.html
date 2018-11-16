@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.4/jquery.mobile-1.4.4.min.css">
+<script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+<script src="https://code.jquery.com/mobile/1.4.4/jquery.mobile-1.4.4.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+<link rel="stylesheet" href="css/view.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU"
+ crossorigin="anonymous">
+<link rel="stylesheet" href="css/messages.css">
+</head>
+<body>
+	<ul>
+		<li><a class="active" href="./profile.html" style="color: white">Profile</a></li>
+		<li><a href="./jams.html" style="color: white">Jams</a></li>
+		<li><a href="./view" style="color: white">Read</a></li>
+		<li><a href="javascript:void(0)" onclick="logout()"><i class="fas fa-sign-out-alt" style="color: white"></i></a></li>
+	</ul>
+	<div id="cards">
+  </div>
+<script>
+	function addHandlers() {
+		$(".buddy").on("swiperight", function () {
+			console.log("Swiping Right");
+			$(this).addClass('rotate-left').delay(700).fadeOut(1);
+			$('.buddy').find('.status').remove();
+			addLike($(this).attr('id'));
+			$(this).append('<div class="status like">Like!</div>');
+			if ($(this).is(':last-child')) {
+				$('.buddy:nth-child(1)').removeClass('rotate-left rotate-right').fadeIn(300);
+			} else {
+				$(this).next().removeClass('rotate-left rotate-right').fadeIn(400);
+			}
+		});
+
+		$(".buddy").on("swipeleft", function () {
+			console.log("Swiping Left");
+			$(this).addClass('rotate-right').delay(700).fadeOut(1);
+			$('.buddy').find('.status').remove();
+			$(this).append('<div class="status dislike">Dislike!</div>');
+
+			if ($(this).is(':last-child')) {
+			} else {
+				$(this).next().removeClass('rotate-left rotate-right').fadeIn(400);
+			}
+		});
+	}
+
+	function checkLoggedIn() {
+		fetch('http://localhost:3000/isloggedin', {
+			method: "GET",
+			credentials: 'include',
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json',
+			},
+		}).then((response) => {
+			return response.json();
+		}).then((data) => {
+			if(!data.isloggedin || data.isloggedin == false) {
+				window.location = 'http://localhost:8080/login.html';
+			}
+		}).catch((error) => {
+			console.log(error);
+		});
+	}
+
+	function addBuddies(jams) {
+		console.log(jams);
+		for(let i = 0; i < jams.length; i++) {
+			const jam = jams[i];
+			const index = i;
+			document.getElementById("cards").innerHTML += '<div class="buddy" id=' + jam.jam_id + '>' +
+				'<div id="container" style="width: 300px; z-index: 0">' +
+				'<div class="modal avatar" id="myModal" style="display: block; position: relative; margin-left: 0; margin-top: 0;">' +
+				'<div class="modal-dialog">' +
+				'<div class="modal-content">' +
+				'<div class="modal-header">' +
+				'<h4 class="modal-title" style="color: black;">' + jam.title + '</h4>' +
+				'</div>' +
+				'<div class="modal-body" style="color: black;">' +
+				'<table>' +
+				'<tbody class="table">' +
+				'<tr>' +
+				'<td>' + jam.verse_1 + '</td>' +
+				'</tr>' +
+				'<tr>' +
+				'<td>' + jam.verse_2 + '</td>' +
+				'</tr>' +
+				'<tr>' +
+				'<td>' + jam.verse_3 + '</td>' +
+				'</tr>' +
+				'</tbody></table></div></div>' + ((jam.liked)?'<i class="fas fa-heart fa-3x" style="color: red; padding-left: 10px; padding-top: 40px; width: 50px; height: 50px;"></i>':'') + '</div></div></div></div>';
+				if(index == 0) {
+					document.getElementById(jam.jam_id).style.display =  "block";
+				}
+		}
+		addHandlers();
+	}
+
+	function getAllJams() {
+		fetch('http://localhost:3000/getCompletedJams', {
+			method: "GET",
+			credentials: 'include',
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json',
+			},
+		}).then((response) => {
+			return response.json();
+		}).then((data) => {
+			console.log(data.jams);
+			addBuddies(data.jams);
+		}).catch((error) => {
+			console.log(error);
+		});
+	}
+
+	function addLike(jam_id) {
+		fetch('http://localhost:3000/addLike', {
+			method: "POST",
+			credentials: 'include',
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				jam_id: jam_id,
+			}),
+		}).then((response) => {
+			return response.json();
+		}).then((data) => {
+			console.log(data);
+		}).catch((error) => {
+			console.log(error);
+		});
+	}
+
+	function logout() {
+		fetch('http://localhost:3000/logout', {
+			method: "GET",
+			credentials: 'include',
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json',
+			},
+		}).then((response) => {
+			console.log(response);
+			checkLoggedIn();
+			return response.json();
+		}).then((data) => {
+		}).catch((error) => {
+			console.log(error);
+		});
+	}
+
+
+	checkLoggedIn();
+	getAllJams();
+</script>
+</body>
+</html>

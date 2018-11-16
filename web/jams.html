@@ -10,8 +10,8 @@
 
 	<h1 align="center" > HaikuJam! Connect with Words </h1>
 	<ul>
-	<li><a class="active" href="./profile.html">Profile</a></li>
-	<li><a href="./jams.html">Jams</a></li>
+	<li><a class="active" href="./profile">Profile</a></li>
+	<li><a href="./view">Read</a></li>
 	<li><a href="javascript:void(0)" onclick="logout()"><i class="fas fa-sign-out-alt"></i></a></li>
 	<div id="newjam">
 		<h2>Create Your new Jam</h2>
@@ -32,7 +32,7 @@
 		<div id="right" onclick="fetchNextJam()"><a href ="" ><h3>&#10095&#10095</h3></a></div>
 
 		<table>
-			<caption><h3></h3></caption>
+			<caption><h3 id="title"></h3></caption>
 			<tr id="verse1">
 			</tr>
 			<tr id="verse2">
@@ -111,9 +111,13 @@
 
 	function updateFeed(jam) {
 		if(jam == null) {
-			document.getElementById("verse1").innerHTML = '<td> No Jams Available </td>';
+			document.getElementById("title").innerHTML = '<td> No Jams Available </td>';
+			document.getElementById("verse1").innerHTML = '';
+			document.getElementById("verse2").innerHTML = '';
+			document.getElementById("verse3").innerHTML = '';
 		} else {
 			jam_id = jam.jam_id;
+			document.getElementById("title").innerHTML = jam.title;
 			document.getElementById("verse1").innerHTML = '<td>' + jam.verse_1 + '</td>' + '<td> User: ' + jam.user_name_1 + '</td>';
 			if(jam.user_id_2) {
 				line = 2;
@@ -144,7 +148,7 @@
 			return response.json();
 		}).then((data) => {
 			console.log(data);
-			updateFeed(data.jam);
+			fetchNextJam();
 		}).catch((error) => {
 			console.log(error);
 		});
